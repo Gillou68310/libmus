@@ -643,8 +643,8 @@ static void __MusIntProcessEnvelope(channel_t *cp)
   /* 99.01.29 - Removed this decrement and check of env_count - TW */
   /* It looks like this should have been remived at the time env_speed_calc was introduced */
   /* assuming it works ok, env_count can be removed from the channel structure */
-  // cp->env_count--; *.
-  /* if(!cp->env_count) */
+  cp->env_count--;
+  if(!cp->env_count)
   {
     cp->env_count = cp->env_speed;
 

@@ -25,9 +25,9 @@
 /* internal workspace */
 static u32 frame_samples;
 static u32 frame_samples_min;
-#ifdef SUPPORT_NAUDIO
+//#ifdef SUPPORT_NAUDIO
 static u32 frame_samples_max;
-#endif
+//#endif
 static u32 extra_samples;
 
 

@@ -63,6 +63,7 @@ static ALDMAproc __CallBackDmaNew(void *ignored);
 static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored);
 static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_length);
 
+static u8 pad[4];
 
 /** Queues and storage for use with audio DMA's ****/
 static OSMesgQueue     audDMAMessageQ;
@@ -291,7 +292,7 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 		if(sample_addr_end<=current_dma_buffer->sample_addr+audio_dma_size)
 		{
 			/* modification 99.01.12 from Yutaka Murakami v3.13 */
-			current_dma_buffer->keep_count = 1+FRAME_LAG;
+			/*current_dma_buffer->keep_count = 1+FRAME_LAG;*/
 			return (current_dma_buffer);
 		}
 
