@@ -1012,7 +1012,7 @@ int MusSetSongFxChange(musBool onoff)
   none
 *+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*/
 
-#define OFFSETTOPOINTER(base,offset)	((u32)(base)+(u32)(offset))
+#define OFFSETTOPOINTER(base,offset)	((uintptr_t)(base)+(uintptr_t)(offset))
 
 void MusFxBankInitialize(void *fxbank)
 {

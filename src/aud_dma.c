@@ -42,7 +42,7 @@ typedef struct dma_list_s
    struct dma_list_s *prev;
    struct dma_list_s *next;
    int               keep_count;
-   unsigned long     sample_addr;
+   uintptr_t         sample_addr;
    unsigned char     *ram_addr;
 } dma_list_t;
 
@@ -60,8 +60,8 @@ static int        audio_dma_count;
 
 /* internal function prototypes */
 static ALDMAproc __CallBackDmaNew(void *ignored);
-static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored);
-static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_length);
+static intptr_t __CallBackDmaProcess(intptr_t addr, s32 len, void *ignored);
+static dma_list_t *__MusIntDmaSample(uintptr_t sample_addr, int sample_length);
 
 static u8 pad[4];
 
@@ -223,7 +223,7 @@ static ALDMAproc __CallBackDmaNew(void *ignored)
   RAM address of sample
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored)
+static intptr_t __CallBackDmaProcess(intptr_t addr, s32 len, void *ignored)
 {
 	dma_list_t *buffer;
 	unsigned char *ram_addr;;
@@ -232,13 +232,15 @@ static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored)
 	if (!buffer)
 		return (osVirtualToPhysical((void *)addr));
 
+#ifdef TARGET_N64
 	if ((addr&0xff000000)==0xff000000)
 	{
 		addr &= 0xffffff;
 		addr += DDROM_WAVEDATA_START;
 	}
+#endif
 
-	ram_addr = buffer->ram_addr+(u32)addr-buffer->sample_addr;
+	ram_addr = buffer->ram_addr+(uintptr_t)addr-buffer->sample_addr;
 	return (osVirtualToPhysical(ram_addr));
 }
 
@@ -258,14 +260,15 @@ static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored)
   Address of dma buffer containing sample
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_length)
+static dma_list_t *__MusIntDmaSample(uintptr_t sample_addr, int sample_length)
 {
 	dma_list_t *current_dma_buffer, *free_buffer, *last_buffer;
-	unsigned long sample_addr_end;
+	uintptr_t sample_addr_end;
 	OSPiHandle	*pi_handle;
 	OSIoMesg	*io_msg;
 
 	/* test if sample is coming from the N64DD ROM */
+#ifdef TARGET_N64
 	if ((sample_addr&0xff000000)==0xff000000)
 	{
 		pi_handle = diskrom_handle;
@@ -273,6 +276,7 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 		sample_addr += DDROM_WAVEDATA_START;
 	}
 	else
+#endif
 	{
 		if (__muscontrol_flag&MUSCONTROL_RAM)
 		    return (NULL);

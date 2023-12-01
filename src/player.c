@@ -1102,7 +1102,7 @@ static void __MusIntRemapPtrBank(char *pptr, char *wptr)
   ptr_bank_t *ptrfile_addr;
   unsigned char *chardetune, charwork;
   float *floatdetune, floatwork;
-  unsigned long base;
+  uintptr_t base;
 
   ptrfile_addr = (ptr_bank_t *)pptr;
   /* return if already remapped */
@@ -1133,18 +1133,20 @@ static void __MusIntRemapPtrBank(char *pptr, char *wptr)
     /* remap pointers inside ALWaveTable structures */
     if(!ptrfile_addr->wave_list[i]->flags)
     {
-      base = (unsigned long)ptrfile_addr->wave_list[i]->base;
+      base = (uintptr_t)ptrfile_addr->wave_list[i]->base;
+#ifdef TARGET_N64
       if ((base&0xff000000)!=0xff000000) /* not n64dd sample */
+#endif
       {
-	base += (unsigned long)wptr;
+	base += (uintptr_t)wptr;
 	ptrfile_addr->wave_list[i]->base = (u8 *)base;	
       }
       ptrfile_addr->wave_list[i]->flags = 1;
       
       if(ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop)			
-	ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop = (ALADPCMloop *)((u32)(ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop)+(u32)(pptr));
+	ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop = (ALADPCMloop *)((uintptr_t)(ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop)+(uintptr_t)(pptr));
       if(ptrfile_addr->wave_list[i]->type == AL_ADPCM_WAVE)			
-	ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book = (ALADPCMBook *)((u32)(ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book)+(u32)(pptr));			
+	ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book = (ALADPCMBook *)((uintptr_t)(ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book)+(uintptr_t)(pptr));			
     }	
   }
   /* flush data cache so the new sample pointers are visible to the RSP */
@@ -1337,11 +1339,11 @@ static int __MusIntFindChannel(song_t *addr, int song_chan)
 
 static void __MusIntRemapPtrs(void *addr, void *offset, int count)
 {
-  unsigned long *dest, add;
+  uintptr_t *dest,add;
   int i;
 
-  dest = (unsigned long *)addr;
-  add = (unsigned long)offset;
+  dest = (uintptr_t *)addr;
+  add = (uintptr_t)offset;
   for (i=0; i<count; i++)
     if (dest[i])
       dest[i]+=add;
@@ -1390,7 +1392,11 @@ static unsigned long __MusIntStartEffect(channel_t *cp, fx_header_t *header, int
 static unsigned long __MusIntFindChannelAndStart(fx_header_t *header, int number, int volume, int pan, int priority)
 {
    int i, current_priority;
+#ifdef AVOID_UB
+   channel_t *cp, *current_cp = NULL;
+#else
    channel_t *cp, *current_cp;
+#endif
 
 	/* get default priority if required */
    if (priority==-1)

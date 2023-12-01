@@ -75,7 +75,7 @@ typedef struct
 	unsigned long 	flags;
 	ptr_bank_t		*ptr_addr;
 	unsigned short	*wave_table;
-	fx_t     		effects[1];		/* "number_of_components" sized array */
+	fx_t     		effects[5000];		/* "number_of_components" sized array */
 } fx_header_t;
 
 

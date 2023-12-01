@@ -140,7 +140,7 @@ static void __OsSchedDoTask(musTask *task)
    t.list.t.data_size   = task->data_size;
    t.list.t.type  = M_AUDTASK;
    t.list.t.ucode_boot = (u64 *)rspbootTextStart;
-   t.list.t.ucode_boot_size = ((int) rspbootTextEnd - (int) rspbootTextStart);
+   t.list.t.ucode_boot_size = ((intptr_t) rspbootTextEnd - (intptr_t) rspbootTextStart);
    t.list.t.flags  = 0;
    t.list.t.ucode = (u64 *) task->ucode;
    t.list.t.ucode_data = (u64 *) task->ucode_data;
